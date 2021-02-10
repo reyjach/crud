@@ -5,13 +5,14 @@ import shortid from 'shortid';
 function App() {
   const [task, setTask] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [editeMode, setEditeMode] = useState(false);
+  const [id, setId] = useState("");
 
   const addTask = (e) => {
     e.preventDefault();
 
     if(isEmpty(task)){
-      console.log('task empty')
-      return 
+      return;
     }
 
     const newTask = {
@@ -24,7 +25,28 @@ function App() {
 
   const delateTask = (id) => {
     const filteredTasks = tasks.filter(task => task.id !== id);
-    setTasks(filteredTasks)
+    setTasks(filteredTasks);
+  }
+
+  const editTask = (theTask) => {
+    setTask(theTask.name)
+    setEditeMode(true);
+    setId(theTask.id);
+
+  }
+
+  const saveTask = (e) => {
+    e.preventDefault();
+
+    if(isEmpty(task)){
+      return;
+    }
+
+    const editedTasks = tasks.map(item => item.id === id ? {id, name: task}: item );
+    setTasks(editedTasks);
+    setEditeMode(false);
+    setTask("");
+    setId("");
   }
 
   return (
@@ -43,8 +65,16 @@ function App() {
                 tasks.map((task) =>(
                   <li className="list-group-item" key={task.id}>
                     <span className="lead">{task.name}</span>
-                    <button className="btn btn-danger btn-sm float-right mx-2" onClick={() => delateTask(task.id)}>Eliminar</button>
-                    <button className="btn btn-warning btn-sm float-right">Editar</button>
+                    <button 
+                      className="btn btn-danger btn-sm float-right mx-2" 
+                      onClick={() => delateTask(task.id)}>
+                        Eliminar
+                      </button>
+                    <button 
+                      className="btn btn-warning btn-sm float-right" 
+                      onClick={() => editTask(task)}>
+                        Editar
+                    </button>
                   </li>
                 ))
               }
@@ -54,8 +84,11 @@ function App() {
           }
         </div>
         <div className="col-4">
-          <h4 className="text-center">Formulario</h4>
-          <form onSubmit={addTask}>
+          <h4 
+            className="text-center">
+            {editeMode ? " Modificar tarea" : "Agregar tarea"}
+          </h4>
+          <form onSubmit={editeMode ? saveTask : addTask }>
             <input 
               type="text" 
               className="form-control mb-2" 
@@ -63,7 +96,11 @@ function App() {
               onChange={(text) => setTask(text.target.value)}
               value={task}>
             </input>
-            <button className="btn btn-dark btn-block" type="submit">Agregar</button>
+            <button 
+              className= {editeMode ? "btn btn-warning btn-block" : "btn btn-dark btn-block"} 
+              type="submit">
+              {editeMode ? "Guardar" : "Agregar"}
+            </button>
 
           </form>
         </div>
